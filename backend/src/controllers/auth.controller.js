@@ -1,5 +1,5 @@
-import cloudinary from '../lib/clloudnary.js';
-import { generateToken } from '../lib/token.js';
+import cloudinary from '../DataBase/clloudnary.js';
+import { generateToken } from '../DataBase/token.js';
 import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 
@@ -98,10 +98,14 @@ export const updateProfile = async (req, res) => {
 }
 
 
-export const chackAuth = async (req, res) => {
+export const checkAuth = async (req, res) => {
     try {
-        res.status(200).json(req.user)
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        res.status(200).json(req.user);
     } catch (error) {
-        console.log("Error In CheckAuth Controller", error.message)
+        console.log("Error In CheckAuth Controller:", error.message);
+        res.status(500).json({ message: "Server error" });
     }
 }
