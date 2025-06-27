@@ -1,11 +1,18 @@
-import { create } from "zustand";
+// src/store/useTHEME_COLORStore.js
 
-const storedTheme = localStorage.getItem("chat-theme") || "light";
+import { create } from 'zustand';
+import { applyCustomTheme } from '../consonent/themeUtil';
 
-export const useThemeStore = create((set) => ({
-  theme: storedTheme,
-  setTheme: (newTheme) => {
-    localStorage.setItem("chat-theme", newTheme);
-    set({ theme: newTheme });
-  },
-}));
+export const useTHEME_COLORStore = create((set) => {
+  const saved = localStorage.getItem('chat-theme') || 'light';
+  applyCustomTheme(saved); // Apply on load
+
+  return {
+    theme: saved,
+    setTheme: (newTheme) => {
+      localStorage.setItem('chat-theme', newTheme);
+      applyCustomTheme(newTheme);
+      set({ theme: newTheme });
+    },
+  };
+});
