@@ -19,9 +19,8 @@ const SettingsPage = () => {
   ]);
   const [inputText, setInputText] = useState("");
 
-  const scrollRef = useRef(null); // ✅ ref for scrolling
+  const scrollRef = useRef(null);  
 
-  // Auto typing + send
   useEffect(() => {
     const messagesList = [
       "Hey there! 👋",
@@ -34,7 +33,7 @@ const SettingsPage = () => {
 
     const typeMessage = (message) => {
       let charIndex = 0;
-      setInputText(""); // clear before typing
+      setInputText("");  
 
       const typingInterval = setInterval(() => {
         setInputText((prev) => prev + message[charIndex]);
@@ -60,21 +59,21 @@ const SettingsPage = () => {
 
     const loop = setInterval(() => {
       typeMessage(messagesList[msgIndex]);
-      msgIndex = (msgIndex + 1) % messagesList.length; // loop back to start
+      msgIndex = (msgIndex + 1) % messagesList.length; 
     }, 4000);
 
     return () => clearInterval(loop);
   }, []);
 
 
-  // ✅ Auto scroll on new message
+   
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // Emoji rain trigger
+ 
   useEffect(() => {
     if (emojiRain) {
       const selectedColors = Object.values(THEME_COLORS[theme]);
@@ -86,7 +85,6 @@ const SettingsPage = () => {
 
   return (
     <div className="min-h-screen container mx-auto px-4 pt-24 max-w-6xl relative overflow-hidden">
-      {/* Emoji Rain */}
       {emojiRain && (
         <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
           {Array.from({ length: 100 }).map((_, idx) => (
@@ -132,7 +130,6 @@ const SettingsPage = () => {
         `}
       </style>
 
-      {/* Theme Picker */}
       <section className="mb-12">
         <h3 className="text-2xl font-semibold mb-4">Pick a Theme</h3>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
@@ -165,14 +162,12 @@ const SettingsPage = () => {
         </div>
       </section>
 
-      {/* Chat Preview */}
       <section className="mb-12">
         <h3 className="text-2xl font-semibold mb-4">Live Chat Preview</h3>
         <div className="rounded-3xl border border-base-300 bg-base-100 shadow-2xl overflow-hidden">
           <div className="p-6 bg-base-200">
             <div className="max-w-2xl mx-auto">
               <div className="bg-base-100 border border-base-300 rounded-3xl shadow-2xl overflow-hidden">
-                {/* Header */}
                 <div className="flex items-center gap-4 px-6 py-4 bg-base-100 border-b border-base-300">
                   <div className="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold text-lg shadow">
                     S
@@ -183,7 +178,6 @@ const SettingsPage = () => {
                   </div>
                 </div>
 
-                {/* Messages */}
                 <div
                   ref={scrollRef}
                   className="p-5 space-y-4 min-h-[240px] max-h-[240px] overflow-y-auto bg-gradient-to-b from-base-100 to-base-200"
@@ -207,7 +201,6 @@ const SettingsPage = () => {
                   ))}
                 </div>
 
-                {/* Input */}
                 <div className="p-5 bg-base-100 border-t border-base-300">
                   <div className="flex gap-2 items-center">
                     <input

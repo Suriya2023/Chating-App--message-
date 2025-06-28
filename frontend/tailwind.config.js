@@ -14,6 +14,9 @@ export default {
         'base-200': 'var(--color-base-200)',
         'base-content': 'var(--color-base-content)',
       },
+       screens: {
+        'min-[446px]': '446px',  
+      },
     },
   },
   plugins: [daisyui],

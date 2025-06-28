@@ -9,7 +9,6 @@ const ProfilePage = () => {
   const { theme } = useTHEME_COLORStore();
   const [selectedImg, setSelectedImg] = useState(null);
 
-  // 🧠 Dynamically set CSS vars based on selected theme
   useEffect(() => {
     const current = THEME_COLORS[theme];
     if (current) {
@@ -43,7 +42,6 @@ const ProfilePage = () => {
             <p className="mt-2">Your profile information</p>
           </div>
 
-          {/* Avatar Upload */}
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
@@ -73,7 +71,6 @@ const ProfilePage = () => {
             </p>
           </div>
 
-          {/* User Info */}
           <div className="space-y-6">
             <div className="space-y-1.5">
               <div className="text-sm text-zinc-400 flex items-center gap-2">
@@ -96,7 +93,6 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Account Info */}
           <div className="mt-6 border border-black rounded-xl p-6">
             <h2 className="text-lg font-medium mb-4">Account Information</h2>
             <div className="space-y-3 text-sm">
