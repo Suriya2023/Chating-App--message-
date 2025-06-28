@@ -1,133 +1,238 @@
+import { useEffect, useState, useRef } from "react";
 import { THEME_COLORS } from "../consonent/index.js";
 import { useTHEME_COLORStore } from "../store/useThemeStore.js";
-import { Send } from "lucide-react";
+import { Send, Smile, PhoneCall } from "lucide-react";
 
-const PREVIEW_MESSAGES = [
-  { id: 1, content: "Hey! How's it going?", isSent: false },
-  { id: 2, content: "I'm doing great! Just working on some new features.", isSent: true },
+const CHAT_FEATURES = [
+  { icon: <Smile className="text-primary" size={20} />, label: "Emojis" },
+  { icon: <PhoneCall className="text-secondary" size={20} />, label: "Voice Call" },
+  { icon: <Send className="text-accent" size={20} />, label: "Fast Messaging" },
 ];
 
 const SettingsPage = () => {
   const { theme, setTheme } = useTHEME_COLORStore();
+  const [emojiRain, setEmojiRain] = useState(false);
+  const [rainColors, setRainColors] = useState([]);
+  const [messages, setMessages] = useState([
+    { id: 1, content: "Hey! How's it going?", isSent: false },
+    { id: 2, content: "I'm doing great! Just working on some new features.", isSent: true },
+  ]);
+  const [inputText, setInputText] = useState("");
+
+  const scrollRef = useRef(null); // ✅ ref for scrolling
+
+  // Auto typing + send
+  useEffect(() => {
+    const messagesList = [
+      "Hey there! 👋",
+      "Welcome to the preview chat.",
+      "We’re just testing auto messages.",
+      "Hope you like the theme!",
+      "Enjoy your chat experience 😄",
+    ];
+    let msgIndex = 0;
+
+    const typeMessage = (message) => {
+      let charIndex = 0;
+      setInputText(""); // clear before typing
+
+      const typingInterval = setInterval(() => {
+        setInputText((prev) => prev + message[charIndex]);
+        charIndex++;
+
+        if (charIndex >= message.length) {
+          clearInterval(typingInterval);
+
+          setTimeout(() => {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: Date.now(),
+                content: message,
+                isSent: true,
+              },
+            ]);
+            setInputText("");
+          }, 500);
+        }
+      }, 100);
+    };
+
+    const loop = setInterval(() => {
+      typeMessage(messagesList[msgIndex]);
+      msgIndex = (msgIndex + 1) % messagesList.length; // loop back to start
+    }, 4000);
+
+    return () => clearInterval(loop);
+  }, []);
+
+
+  // ✅ Auto scroll on new message
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  // Emoji rain trigger
+  useEffect(() => {
+    if (emojiRain) {
+      const selectedColors = Object.values(THEME_COLORS[theme]);
+      setRainColors(selectedColors);
+      const timeout = setTimeout(() => setEmojiRain(false), 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [emojiRain, theme]);
 
   return (
-    <div className="h-screen container mx-auto px-4 pt-20 max-w-5xl">
-      <div className="space-y-6">
-        {/* Theme Selection */}
-        <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold">Theme</h2>
-          <p className="text-sm text-base-content/70">
-            Choose a theme for your chat interface
-          </p>
+    <div className="min-h-screen container mx-auto px-4 pt-24 max-w-6xl relative overflow-hidden">
+      {/* Emoji Rain */}
+      {emojiRain && (
+        <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
+          {Array.from({ length: 100 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="absolute w-3 h-3 rounded-full animate-slide-burst"
+              style={{
+                top: "50%",
+                left: "50%",
+                backgroundColor: rainColors[Math.floor(Math.random() * rainColors.length)],
+                animationDelay: `${Math.random() * 1.5}s`,
+              }}
+            ></div>
+          ))}
         </div>
+      )}
 
-        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+      <style>
+        {`
+          @keyframes slide-burst {
+            0% {
+              transform: translate(-50%, -50%) scale(1);
+              opacity: 1;
+            }
+            50% {
+              transform: translate(
+                calc(-50% + ${Math.random() * 300 - 150}px),
+                calc(-50% + ${Math.random() * 300 - 150}px))
+                scale(1.4);
+              opacity: 0.8;
+            }
+            100% {
+              transform: translate(
+                calc(-50% + ${Math.random() * 800 - 400}px),
+                calc(-50% + ${Math.random() * 800 - 400}px))
+                scale(0.6);
+              opacity: 0;
+            }
+          }
+          .animate-slide-burst {
+            animation: slide-burst 2.5s ease-out forwards;
+          }
+        `}
+      </style>
+
+      {/* Theme Picker */}
+      <section className="mb-12">
+        <h3 className="text-2xl font-semibold mb-4">Pick a Theme</h3>
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
           {Object.keys(THEME_COLORS).map((t) => (
             <button
               key={t}
-              className={`group flex flex-col items-center gap-1.5 p-2 rounded-lg transition-colors
-              ${theme === t ? "bg-base-200" : "hover:bg-base-200/50"}`}
-              onClick={() => setTheme(t)}
+              onClick={() => {
+                setTheme(t);
+                setEmojiRain(true);
+              }}
+              className={`group p-2 rounded-xl bg-white border border-base-300 shadow-xl hover:shadow-2xl hover:scale-105 transition-transform duration-200 ease-in-out
+              ${theme === t ? "ring-2 ring-primary scale-110" : ""}`}
             >
-              <div className="relative h-8 w-full rounded-md overflow-hidden">
+              <div className="w-full h-10 rounded-md overflow-hidden relative">
                 <div
                   className="absolute inset-0 grid grid-cols-4 gap-px p-1"
                   style={{ backgroundColor: THEME_COLORS[t]["--color-base-100"] }}
                 >
-                  <div
-                    className="rounded"
-                    style={{ backgroundColor: THEME_COLORS[t]["--color-primary"] }}
-                  ></div>
-                  <div
-                    className="rounded"
-                    style={{ backgroundColor: THEME_COLORS[t]["--color-secondary"] }}
-                  ></div>
-                  <div
-                    className="rounded"
-                    style={{ backgroundColor: THEME_COLORS[t]["--color-accent"] }}
-                  ></div>
-                  <div
-                    className="rounded"
-                    style={{ backgroundColor: THEME_COLORS[t]["--color-neutral"] }}
-                  ></div>
+                  <div className="rounded" style={{ backgroundColor: THEME_COLORS[t]["--color-primary"] }}></div>
+                  <div className="rounded" style={{ backgroundColor: THEME_COLORS[t]["--color-secondary"] }}></div>
+                  <div className="rounded" style={{ backgroundColor: THEME_COLORS[t]["--color-accent"] }}></div>
+                  <div className="rounded" style={{ backgroundColor: THEME_COLORS[t]["--color-neutral"] }}></div>
                 </div>
               </div>
-              <span className="text-[11px] font-medium truncate w-full text-center">
+              <span className="block mt-2 text-xs font-medium text-center truncate">
                 {t.charAt(0).toUpperCase() + t.slice(1)}
               </span>
             </button>
           ))}
         </div>
+      </section>
 
-        {/* Preview */}
-        <h3 className="text-lg font-semibold mb-3">Preview</h3>
-        <div className="rounded-xl border border-base-300 overflow-hidden bg-base-100 shadow-lg">
-          <div className="p-4 bg-base-200">
-            <div className="max-w-lg mx-auto">
-              {/* Chat UI */}
-              <div className="bg-base-100 rounded-xl shadow-sm overflow-hidden">
+      {/* Chat Preview */}
+      <section className="mb-12">
+        <h3 className="text-2xl font-semibold mb-4">Live Chat Preview</h3>
+        <div className="rounded-3xl border border-base-300 bg-base-100 shadow-2xl overflow-hidden">
+          <div className="p-6 bg-base-200">
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-base-100 border border-base-300 rounded-3xl shadow-2xl overflow-hidden">
                 {/* Header */}
-                <div className="px-4 py-3 border-b border-base-300 bg-base-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-content font-medium">
-                      J
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-sm">John Doe</h3>
-                      <p className="text-xs text-base-content/70">Online</p>
-                    </div>
+                <div className="flex items-center gap-4 px-6 py-4 bg-base-100 border-b border-base-300">
+                  <div className="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold text-lg shadow">
+                    S
+                  </div>
+                  <div className="flex flex-col">
+                    <h4 className="font-semibold text-base leading-none">Suraj Rajput</h4>
+                    <p className="text-sm text-base-content/60">Online now</p>
                   </div>
                 </div>
 
                 {/* Messages */}
-                <div className="p-4 space-y-4 min-h-[200px] max-h-[200px] overflow-y-auto bg-base-100">
-                  {PREVIEW_MESSAGES.map((message) => (
+                <div
+                  ref={scrollRef}
+                  className="p-5 space-y-4 min-h-[240px] max-h-[240px] overflow-y-auto bg-gradient-to-b from-base-100 to-base-200"
+                >
+                  {messages.map((msg) => (
                     <div
-                      key={message.id}
-                      className={`flex ${message.isSent ? "justify-end" : "justify-start"}`}
+                      key={msg.id}
+                      className={`flex transition-all duration-300 ease-in-out ${msg.isSent ? "justify-end" : "justify-start"
+                        }`}
                     >
                       <div
-                        className={`max-w-[80%] rounded-xl p-3 shadow-sm ${
-                          message.isSent
-                            ? "bg-primary text-primary-content"
-                            : "bg-base-200"
-                        }`}
-                      >
-                        <p className="text-sm">{message.content}</p>
-                        <p
-                          className={`text-[10px] mt-1.5 ${
-                            message.isSent
-                              ? "text-primary-content/70"
-                              : "text-base-content/70"
+                        className={`max-w-[75%] px-5 py-3 text-sm shadow-md rounded-xl relative ${msg.isSent
+                            ? "bg-primary text-primary-content rounded-tr-none"
+                            : "bg-base-200 text-base-content rounded-tl-none"
                           }`}
-                        >
-                          12:00 PM
-                        </p>
+                      >
+                        <p>{msg.content}</p>
+                        <p className="text-[10px] mt-1 text-right opacity-60">12:00 PM</p>
                       </div>
                     </div>
                   ))}
                 </div>
 
                 {/* Input */}
-                <div className="p-4 border-t border-base-300 bg-base-100">
-                  <div className="flex gap-2">
+                <div className="p-5 bg-base-100 border-t border-base-300">
+                  <div className="flex gap-2 items-center">
                     <input
                       type="text"
-                      className="input input-bordered flex-1 text-sm h-10"
-                      placeholder="Type a message..."
-                      value="This is a preview"
+                      className="input input-bordered flex-1 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      value={inputText}
                       readOnly
                     />
-                    <button className="btn btn-primary h-10 min-h-0">
+                    <button
+                      className="btn btn-primary h-10 min-h-0 px-4 shadow-md hover:scale-105 transition-transform"
+                      onClick={() => setEmojiRain(true)}
+                    >
                       <Send size={18} />
                     </button>
                   </div>
                 </div>
               </div>
+
+              <p className="text-center text-sm text-base-content/70 mt-4">
+                Designed with ❤️ by Suraj Rajput
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

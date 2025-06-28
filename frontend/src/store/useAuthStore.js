@@ -8,6 +8,7 @@ export const useAuthStore = create((set) => ({
     isLogging: false,
     isUpdatingProfile: false,
     isCheckingAuth: true,
+    onlineUsers: [],
 
     checkinAuth: async () => {
         try {
@@ -27,8 +28,7 @@ export const useAuthStore = create((set) => ({
             set({ authUser: res.data });
             toast.success("Account created successfuly");
         } catch (error) {
-            const errorMsg =
-                error.response?.data?.message || "Something went wrong during signup";
+
             toast.error(errorMsg);
         }
 
@@ -45,7 +45,7 @@ export const useAuthStore = create((set) => ({
 
             get().connectSocket();
         } catch (error) {
-            toast.error(error.response?.data?.message);
+            toast.error("Something went wrong during Login");
         } finally {
             set({ isLogging: false });
         }
