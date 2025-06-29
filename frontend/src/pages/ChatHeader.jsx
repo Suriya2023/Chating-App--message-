@@ -16,7 +16,7 @@ const ChatHeader = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={handleBack}
-            className="lg:hidden text-primary hover:text-primary/80 transition"
+            className=" text-primary hover:text-primary/80 transition"
             aria-label="Back to contacts"
           >
             <ArrowLeft className="w-5 h-5" />

@@ -11,9 +11,10 @@ import { useAuthStore } from './store/useAuthStore';
 import { Toaster } from 'react-hot-toast';
 
 const App = () => {
-  const { authUser, checkinAuth, isCheckingAuth } = useAuthStore()
+  const { authUser, checkinAuth, isCheckingAuth,onlineUsers } = useAuthStore()
   const { theme } = useTHEME_COLORStore()
 
+  console.log(onlineUsers)
   // ✅ theme apply to <html> tag
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
