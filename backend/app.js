@@ -12,7 +12,7 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-    origin: "https://chat-list-lake.vercel.app/",
+    origin: "https://chat-list-lake.vercel.app/login",
     credentials: true,
 }));
 
