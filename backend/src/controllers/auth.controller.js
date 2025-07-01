@@ -1,7 +1,11 @@
 import cloudinary from '../DataBase/clloudnary.js';
 import { generateToken } from '../DataBase/token.js';
-import User from '../models/user.model.js';
+import userSchema from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
+
+ 
+ 
+ 
 
 export const signup = async (req, res) => {
     try {
@@ -15,7 +19,7 @@ export const signup = async (req, res) => {
             return res.status(400).json({ message: "Password must be at least 6 characters" });
         }
 
-        const existingUser = await User.findOne({ email });
+        const existingUser = await userSchema.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: "Email already exists" });
         }
@@ -31,7 +35,7 @@ export const signup = async (req, res) => {
 
         await newUser.save();
 
-        generateToken(newUser._id, res); 
+        generateToken(newUser._id, res);
 
         res.status(201).json({
             _id: newUser._id,
@@ -41,26 +45,26 @@ export const signup = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Signup Error:", err.message); // 👈 for logs
+        console.error("Signup Error:", err.message);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
-// Dummy login route
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
-            return res.status(400).json({ message: "Email and password required" });
+            return res.status(400).json({ message: "Email and password are required" });
         }
 
-        const user = await User.findOne({ email });
+        const user = await userSchema.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: "Invalid credentials (email)" });
         }
 
-        const isPassword = await bcrypt.compare(password, user.password);
-        if (!isPassword) {
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
             return res.status(400).json({ message: "Invalid credentials (password)" });
         }
 
@@ -74,7 +78,7 @@ export const login = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Error in login Controller:", err);
+        console.error("Login Error:", err.message);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -102,7 +106,7 @@ export const updateProfile = async (req, res) => {
         }
 
         const uploadResponse = await cloudinary.uploader.upload(profilePic);
-        const updatedUser = await User.findByIdAndUpdate(
+        const updatedUser = await userSchema.findByIdAndUpdate(
             userId,
             { profilePic: uploadResponse.secure_url },
             { new: true }
