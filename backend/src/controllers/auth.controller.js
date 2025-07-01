@@ -31,7 +31,7 @@ export const signup = async (req, res) => {
 
         await newUser.save();
 
-        generateToken(newUser._id, res); // ⚠️ If this crashes, 500 will happen
+        generateToken(newUser._id, res); 
 
         res.status(201).json({
             _id: newUser._id,
