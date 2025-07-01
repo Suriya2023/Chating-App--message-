@@ -35,7 +35,7 @@ export const signup = async (req, res) => {
             expiresIn: "7d"
         });
 
-        // ✅ Console log the token
+     
         console.log("Signup Token:", token);
 
         res.cookie("jwt", token, {
@@ -45,7 +45,7 @@ export const signup = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        // ✅ Console log the cookie after setting
+        
         console.log("Signup Cookie Set:", req.cookies);
 
         res.status(201).json({
@@ -111,8 +111,7 @@ export const login = async (req, res) => {
 };
 
 
-
-// Dummy logout route
+ 
 export const logout = (req, res) => {
     try {
         res.cookie("jwt", "", { mmaxAge: 0 })
