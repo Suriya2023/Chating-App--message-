@@ -31,7 +31,7 @@ export const signup = async (req, res) => {
 
         await newUser.save();
 
-        generateToken(newUser._id, res); 
+        generateToken(newUser._id, res);
 
         res.status(201).json({
             _id: newUser._id,
@@ -71,6 +71,13 @@ export const login = async (req, res) => {
             fullName: user.fullName,
             email: user.email,
             profilePic: user.profilePic,
+        });
+        
+        res.cookie("jwt", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
     } catch (err) {
