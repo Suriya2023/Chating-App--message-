@@ -1,4 +1,3 @@
-// /middleware/protectRoute.js
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 
@@ -17,8 +16,8 @@ export const protectRoute = async (req, res, next) => {
       return res.status(404).json({ message: "Unauthorized - User Not Found" });
     }
 
-    req.user = user;
-    next();
+    req.user = user; 
+    next();  
 
   } catch (error) {
     console.error("JWT Auth Error:", error.message);
