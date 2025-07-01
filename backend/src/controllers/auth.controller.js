@@ -31,7 +31,22 @@ export const signup = async (req, res) => {
 
         await newUser.save();
 
-        generateToken(newUser._id, res);
+        const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
+            expiresIn: "7d"
+        });
+
+        // ✅ Console log the token
+        console.log("Signup Token:", token);
+
+        res.cookie("jwt", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        // ✅ Console log the cookie after setting
+        console.log("Signup Cookie Set:", req.cookies);
 
         res.status(201).json({
             _id: newUser._id,
@@ -41,30 +56,46 @@ export const signup = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Signup Error:", err.message); // 👈 for logs
+        console.error("Signup Error:", err.message);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
-// Dummy login route
+
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
             return res.status(400).json({ message: "Email and password required" });
         }
 
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ message: "Invalid credentials (email)" });
+            return res.status(400).json({ message: "Invalid email" });
         }
 
         const isPassword = await bcrypt.compare(password, user.password);
         if (!isPassword) {
-            return res.status(400).json({ message: "Invalid credentials (password)" });
+            return res.status(400).json({ message: "Invalid password" });
         }
 
-        generateToken(user._id, res);
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+            expiresIn: "7d"
+        });
+
+        // ✅ Print token in console
+        console.log("Login Token:", token);
+
+        res.cookie("jwt", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        // ✅ Log cookies (note: req.cookies won’t show new one here, but still for info)
+        console.log("Login Cookie Set:", req.cookies);
 
         res.status(200).json({
             _id: user._id,
@@ -72,14 +103,13 @@ export const login = async (req, res) => {
             email: user.email,
             profilePic: user.profilePic,
         });
-        
-    
 
     } catch (err) {
-        console.error("Error in login Controller:", err);
+        console.error("Login Error:", err.message);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
 
 
 // Dummy logout route
