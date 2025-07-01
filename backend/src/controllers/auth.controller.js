@@ -6,15 +6,17 @@ import bcrypt from 'bcryptjs';
 export const signup = async (req, res) => {
     try {
         const { fullName, email, password } = req.body;
+
         if (!fullName || !email || !password) {
-            return res.status(400).json({ message: "All fields are required !" })
+            return res.status(400).json({ message: "All fields are required!" });
         }
+
         if (password.length < 6) {
             return res.status(400).json({ message: "Password must be at least 6 characters" });
         }
 
-        const user = await User.findOne({ email });
-        if (user) {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
             return res.status(400).json({ message: "Email already exists" });
         }
 
@@ -29,7 +31,7 @@ export const signup = async (req, res) => {
 
         await newUser.save();
 
-        generateToken(newUser._id, res);
+        generateToken(newUser._id, res); // ⚠️ If this crashes, 500 will happen
 
         res.status(201).json({
             _id: newUser._id,
@@ -39,35 +41,44 @@ export const signup = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Error in Signup Controller:", err.message);
+        console.error("Signup Error:", err.message); // 👈 for logs
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
 // Dummy login route
 export const login = async (req, res) => {
-    const { email, password } = req.body
     try {
-        const user = await User.findOne({ email })
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and password required" });
+        }
+
+        const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ message: "Invalid credentials" })
+            return res.status(400).json({ message: "Invalid credentials (email)" });
         }
-        const isPassword = await bcrypt.compare(password, user.password)
+
+        const isPassword = await bcrypt.compare(password, user.password);
         if (!isPassword) {
-            return res.status(400).json({ message: "Invalid credentials" })
+            return res.status(400).json({ message: "Invalid credentials (password)" });
         }
-        generateToken(user._id, res)
+
+        generateToken(user._id, res);
+
         res.status(200).json({
             _id: user._id,
             fullName: user.fullName,
             email: user.email,
-            profilePic: user.profilePic
-        })
+            profilePic: user.profilePic,
+        });
+
     } catch (err) {
-        console.error("Error in login Controller:", err.message);
+        console.error("Error in login Controller:", err);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
 
 // Dummy logout route
 export const logout = (req, res) => {
@@ -82,26 +93,26 @@ export const logout = (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-  try {
-    const { profilePic } = req.body;
-    const userId = req.user._id;
+    try {
+        const { profilePic } = req.body;
+        const userId = req.user._id;
 
-    if (!profilePic) {
-      return res.status(400).json({ message: "Profile pic is required" });
+        if (!profilePic) {
+            return res.status(400).json({ message: "Profile pic is required" });
+        }
+
+        const uploadResponse = await cloudinary.uploader.upload(profilePic);
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { profilePic: uploadResponse.secure_url },
+            { new: true }
+        );
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.log("error in update profile:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
-
-    const uploadResponse = await cloudinary.uploader.upload(profilePic);
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { profilePic: uploadResponse.secure_url },
-      { new: true }
-    );
-
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    console.log("error in update profile:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
 };
 
 export const checkAuth = async (req, res) => {
